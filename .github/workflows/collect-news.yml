@@ -1,0 +1,51 @@
+name: Collect AI News
+
+on:
+  # רץ כל 4 שעות
+  schedule:
+    - cron: '0 */4 * * *'  # כל 4 שעות בדיוק בשעה העגולה
+
+  # אפשר להריץ ידנית דרך GitHub UI
+  workflow_dispatch:
+
+jobs:
+  collect-and-send:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Download previous database
+        uses: actions/download-artifact@v4
+        with:
+          name: news-database
+          path: .
+        continue-on-error: true
+
+      - name: Run news collection
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+        run: |
+          python main.py
+
+      - name: Upload database
+        uses: actions/upload-artifact@v4
+        with:
+          name: news-database
+          path: sent_items.json
+          retention-days: 30
