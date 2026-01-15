@@ -2,20 +2,20 @@
 מתרגם חדשות AI לעברית ומוסיף רעיונות לסרטונים
 """
 import os
-from anthropic import Anthropic
+import google.generativeai as genai
 from typing import Dict, List
 
 class NewsTranslator:
     """מתרגם חדשות לעברית ומוסיף רעיונות לסרטונים"""
 
     def __init__(self):
-        """מאתחל את Claude API"""
-        api_key = os.getenv('ANTHROPIC_API_KEY')
+        """מאתחל את Gemini API"""
+        api_key = os.getenv('GEMINI_API_KEY')
         if not api_key:
-            raise ValueError("חסר ANTHROPIC_API_KEY במשתני הסביבה")
+            raise ValueError("חסר GEMINI_API_KEY במשתני הסביבה")
 
-        self.client = Anthropic(api_key=api_key)
-        self.model = "claude-3-5-sonnet-20241022"
+        genai.configure(api_key=api_key)
+        self.model = genai.GenerativeModel('gemini-1.5-flash')
 
     def translate_and_enhance(self, news_item: Dict) -> Dict:
         """
@@ -32,7 +32,7 @@ class NewsTranslator:
         url = news_item.get('url', '')
         source = news_item.get('source', '')
 
-        # בונה את הפרומפט ל-Claude
+        # בונה את הפרומפט ל-Gemini
         prompt = f"""אתה עוזר שמתרגם חדשות AI לעברית ומוסיף רעיונות לסרטונים.
 
 קיבלת את החדשה הבאה:
@@ -64,17 +64,11 @@ class NewsTranslator:
 • [רעיון 3]"""
 
         try:
-            # שולח בקשה ל-Claude API
-            message = self.client.messages.create(
-                model=self.model,
-                max_tokens=1000,
-                messages=[
-                    {"role": "user", "content": prompt}
-                ]
-            )
+            # שולח בקשה ל-Gemini API
+            response = self.model.generate_content(prompt)
 
             # מנתח את התשובה
-            response_text = message.content[0].text
+            response_text = response.text
 
             # מפריד את התרגום והרעיונות
             hebrew_summary = ""

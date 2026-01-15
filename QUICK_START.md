@@ -3,18 +3,20 @@
 ## 🎯 מה צריך כדי להתחיל?
 
 שני דברים בלבד:
-1. **ANTHROPIC_API_KEY** (מפתח Claude)
+1. **GEMINI_API_KEY** (מפתח Google Gemini - חינמי!)
 2. **TELEGRAM_CHAT_ID** (ה-ID שלך בטלגרם)
 
-יש לך כבר את הטוקן של הבוט: `8127197113:AAE-jwO1z77G1z8FN5Oxj0ujWTuZXmzUlKU`
+יש לך כבר:
+- ✅ בוט טלגרם: `8434612396:AAG9LDLUk69uD3yjxFfx51K225n9WsmnlSw`
+- ✅ Chat ID שלך: `533703477`
 
 ---
 
 ## 📋 צ'קליסט מהיר
 
-- [ ] קבלת Chat ID מטלגרם
-- [ ] קבלת Claude API Key
-- [ ] הוספת שני הסודות ל-GitHub
+- [x] קבלת Chat ID מטלגרם ✅
+- [ ] קבלת Gemini API Key (חינמי!)
+- [ ] הוספת הסודות ל-GitHub
 - [ ] הרצת הבוט!
 
 ---
@@ -48,23 +50,29 @@
 
 ---
 
-## 2️⃣ קבלת Claude API Key (3 דקות)
+## 2️⃣ קבלת Gemini API Key (2 דקות - חינמי!)
 
-### צעדים:
+### צעדים פשוטים:
 
-1. **גש ל:** https://console.anthropic.com/
-2. **הירשם** (עם Google או Email)
-3. **הוסף כרטיס אשראי** (דרוש, אבל יש קרדיט חינמי!)
-4. **לחץ על API Keys → Create Key**
-5. **העתק את המפתח** (מתחיל ב-`sk-ant-api03-...`)
+1. **גש ל:** https://aistudio.google.com/app/apikey
+2. **התחבר** עם חשבון Google (Gmail)
+3. **לחץ:** "Create API Key" או "Get API key"
+4. **בחר:** "Create API key in new project"
+5. **העתק את המפתח** (מתחיל ב-`AIza...`)
 
-⚠️ **חשוב:** המפתח מוצג רק פעם אחת - העתק אותו מיד!
+```
+דוגמה למפתח:
+AIzaSyAbCdEfGhIjKlMnOpQrStUvWxYz1234567
+```
 
-💰 **עלות:** ~$1-2 לחודש (יש $5-10 קרדיט חינמי בהתחלה!)
+💰 **עלות:** **$0 - חינמי לגמרי!** 🎉
+- 15 בקשות לדקה
+- 1,500 בקשות ליום
+- **לא צריך כרטיס אשראי!**
 
 ✅ **סיימת!** יש לך את ה-API Key
 
-📖 [מדריך מפורט →](./GET_ANTHROPIC_KEY.md)
+📖 [מדריך מפורט →](./GET_GEMINI_KEY.md)
 
 ---
 
@@ -72,23 +80,27 @@
 
 1. **לך ל:** https://github.com/Meir770ar/ai-news-telegram-bot/settings/secrets/actions
 
-2. **הוסף סוד ראשון:**
+2. **הוסף 3 secrets:**
+
+   **Secret #1: Gemini API Key**
    - לחץ **New repository secret**
-   - שם: `ANTHROPIC_API_KEY`
-   - ערך: המפתח שקיבלת מ-Anthropic (כל המחרוזת)
+   - Name: `GEMINI_API_KEY`
+   - Value: המפתח שקיבלת מ-Google (מתחיל ב-`AIza...`)
    - לחץ **Add secret**
 
-3. **הוסף סוד שני:**
-   - לחץ **New repository secret** שוב
-   - שם: `TELEGRAM_CHAT_ID`
-   - ערך: המספר שקיבלת מטלגרם
+   **Secret #2: Telegram Bot Token**
+   - לחץ **New repository secret**
+   - Name: `TELEGRAM_BOT_TOKEN`
+   - Value: `8434612396:AAG9LDLUk69uD3yjxFfx51K225n9WsmnlSw`
    - לחץ **Add secret**
 
-4. **(אופציונלי) הוסף את טוקן הבוט:**
-   - שם: `TELEGRAM_BOT_TOKEN`
-   - ערך: `8127197113:AAE-jwO1z77G1z8FN5Oxj0ujWTuZXmzUlKU`
+   **Secret #3: Telegram Chat ID**
+   - לחץ **New repository secret**
+   - Name: `TELEGRAM_CHAT_ID`
+   - Value: `533703477`
+   - לחץ **Add secret**
 
-✅ **סיימת!** כל הסודות במקום
+✅ **סיימת!** כל 3 הסודות במקום
 
 ---
 
