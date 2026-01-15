@@ -27,103 +27,91 @@ class GeminiTranslator:
         if not self.client:
             return self._fallback_process(title, description, source)
         
-        prompt = f"""אתה יוצר תוכן ישראלי מנוסה שמתמחה בסרטונים קצרים (טיקטוק/רילס/שורטס). 
+        prompt = f"""אתה יוצר תוכן ישראלי מנוסה שמתמחה בסרטונים קצרים. 
 
-קיבלת מידע על כלי/חדשה מעולם ה-AI:
-שם: {title}
-מידע: {description}
-מקור: {source}
+**המשימה:** קיבלת מידע על כלי/חדשה מעולם ה-AI. עליך ליצור תוכן מפורט ומעמיק.
 
----
+**מידע שהתקבל:**
+- כותרת: {title}
+- תיאור: {description}
+- מקור: {source}
 
-**חלק 1: סיכום מפורט (כתוב בפורמט עם פסקאות ובולטים)**
+**פלט נדרש - חייב לכלול את כל הסעיפים הבאים:**
 
-===סיכום===
+###כותרת_עברית###
+[כתוב כותרת קליטה בעברית - קצרה וממוקדת]
+
+###סיכום_מפורט###
 
 🔷 **מה זה בכלל?**
-[הסבר בפסקה של 2-3 משפטים מה הכלי עושה. כתוב בפשטות כאילו אתה מסביר לחבר.]
+כתוב פסקה של 3-4 משפטים שמסבירה בדיוק מה הכלי/החדשה עושה. הסבר כאילו אתה מדבר עם חבר שלא מכיר את התחום. אל תשתמש במילים טכניות מסובכות.
 
-🔷 **למה זה מעניין?**
-[פסקה שמסבירה למה זה חדשות גדולות ולמה אנשים צריכים לשים לב לזה]
+🔷 **למה זה חדשות גדולות?**
+כתוב פסקה של 2-3 משפטים שמסבירה למה זה משמעותי. מה השתנה? למה אנשים צריכים לשים לב?
 
 🔷 **איך זה עובד בפועל?**
-[פסקה עם הסבר טכני פשוט + דוגמה קונקרטית לשימוש יום-יומי]
+כתוב פסקה של 3-4 משפטים עם הסבר טכני פשוט. תן דוגמה קונקרטית לשימוש יום-יומי.
 
 🔷 **מה אפשר לעשות עם זה?**
-• שימוש 1 - [דוגמה פרקטית]
-• שימוש 2 - [דוגמה פרקטית]
-• שימוש 3 - [דוגמה פרקטית]
+• שימוש ראשון - [תאר שימוש פרקטי ספציפי]
+• שימוש שני - [תאר שימוש פרקטי ספציפי]  
+• שימוש שלישי - [תאר שימוש פרקטי ספציפי]
 
 🔷 **למי זה מתאים?**
-[פסקה קצרה - יוצרי תוכן? עסקים? סטודנטים? כולם?]
+כתוב 2-3 משפטים - יוצרי תוכן? עסקים קטנים? סטודנטים? מתכנתים? כולם?
 
-🔷 **זמינות ומחיר**
-[האם זמין בישראל? חינמי/בתשלום? יש גרסת נסיון?]
+🔷 **זמינות בישראל ומחיר**
+כתוב 2-3 משפטים - האם זמין בישראל? עברית נתמכת? חינמי או בתשלום? יש גרסת נסיון?
 
 🔷 **יתרונות וחסרונות**
-👍 יתרונות: [2-3 יתרונות]
-👎 חסרונות: [1-2 חסרונות אם יש]
+👍 יתרונות: [ציין 2-3 יתרונות עיקריים]
+👎 חסרונות: [ציין 1-2 חסרונות אם יש]
 
-===שורה_תחתונה===
-[משפט אחד חזק וברור - המלצה סופית]
+###שורה_תחתונה###
+[כתוב משפט אחד חזק וברור - המלצה סופית. מתחיל ב: "בשורה התחתונה..."]
 
----
+###תסריט_וידאו###
 
-**חלק 2: תסריט לסרטון קצר (60 שניות)**
+**הוק (0:00-0:04):** 
+"[כתוב משפט פתיחה דרמטי בעברית מדוברת. משהו כמו: 'תכלס, אם אתה עדיין עושה X ידנית - אתה מפסיד המון זמן']"
+[הוראת צילום: קלוז-אפ, אנרגיה גבוהה, הבעה מופתעת]
 
-עקוב אחרי הפרוטוקול הזה בדיוק:
+**הבעיה (0:04-0:12):**
+"[תאר את הבעיה שהכלי פותר. השתמש בשפה יום-יומית, לא שיווקית. 'אתה יודע את הרגע שאתה...' או 'כולנו מכירים את זה - כש...']"
+[הוראת צילום: B-roll של הבעיה, או תנועות ידיים שמדגימות תסכול]
 
-**שלב 1 - ניתוח:** הכלי הזה פותר בעיה של [זהה את הכאב/רצון של הצופה הישראלי]
+**הפתרון (0:12-0:30):**
+"[הסבר מה הכלי עושה ואיך משתמשים בו. צעד אחר צעד:
+'ככה זה עובד - נכנסים ל... לוחצים על... וזהו.'
+'בתוך X שניות/דקות אתה מקבל...']"
+[הוראת צילום: הקלטת מסך עם חיצים והדגשות. החלף זווית כל 2 שניות]
 
-**שלב 2 - הוק (3-5 שניות):**
-צור פתיח מבוסס פסיכולוגיה התנהגותית. בחר אחד:
-- שנאת הפסד: "אתה מפסיד כסף/זמן כל יום בגלל ש..."
-- פער סקרנות: "גיליתי משהו שרוב האנשים לא יודעים..."
-- הוכחה חברתית: "הכלי הזה עשה לי X בזמן שלקח לאחרים Y..."
-- קונטרה: "כולם חושבים ש... אבל האמת היא..."
+**הוכחה (0:30-0:45):**
+"[הראה תוצאה או דוגמה קונקרטית. 'תראו מה יצא לי...' או 'הנה דוגמה אמיתית...']"
+[הוראת צילום: לפני/אחרי, או תוצאה על המסך בפול-סקרין]
 
-===תסריט===
+**CTA וסיום (0:45-0:60):**
+"[סכם למי מתאים ומה הצעד הבא. 'אם אתה X - זה בשבילך. הקישור בביו/בתגובה הראשונה.'
+סיים עם טוויסט: 'ואל תגידו שלא סיפרתי לכם' או 'תודו לי אחר כך']"
+[הוראת צילום: חזרה לפנים, חיוך, אנרגיה]
 
-[0:00-0:04] **הוק - תפוס תשומת לב**
-"[כתוב משפט פתיחה בעברית מדוברת, דוגרית, שתופס מיד. ללא מילים גבוהות. תכלס.]"
-[הוראת צילום: קלוז-אפ על הפנים, אנרגיה גבוהה]
-
-[0:04-0:12] **הבעיה/כאב**
-"[תאר את הבעיה שהכלי פותר - בשפה של הצופה, לא שפה שיווקית]"
-[הוראת צילום: B-roll של הבעיה או תנועת ידיים]
-
-[0:12-0:30] **הפתרון + הדגמה**
-"[הסבר מה הכלי עושה ואיך משתמשים - צעד אחר צעד, פשוט]"
-[הוראת צילום: הקלטת מסך עם חיצים/הדגשות, החלפת זווית כל 2 שניות]
-
-[0:30-0:45] **הוכחה/תוצאה**
-"[הראה תוצאה אמיתית או דוגמה קונקרטית]"
-[הוראת צילום: לפני/אחרי, או תוצאה על המסך]
-
-[0:45-0:55] **למי מתאים + CTA**
-"[אמור למי זה מושלם ומה הצעד הבא]"
-[הוראת צילום: חזרה לפנים, אנרגיה]
-
-[0:55-0:60] **סיום עם טוויסט**
-"[משפט סיום שגורם לצפות שוב או לשתף]"
-[הוראת צילום: זום אאוט או אפקט]
-
-**ציון VPS משוער:**
+**ציון VPS:**
 - Clarity (בהירות): X/15
-- Curiosity Gap (סקרנות): X/20  
+- Curiosity Gap (פער סקרנות): X/20
 - Proof (הוכחה): X/10
 - Novelty (חדשנות): X/15
 - Cultural Fit (התאמה ישראלית): X/10
-**סה"כ: X/70**
+**סה"כ: XX/70**
 
 ---
 
-כללי כתיבה חובה:
-1. עברית מדוברת - "תכלס", "יאללה", "סבבה" - לא "לפיכך" או "יתרה מכך"
+**כללי כתיבה חובה:**
+1. עברית מדוברת - "תכלס", "יאללה", "סבבה", "חבל על הזמן" - לא "לפיכך" או "יתרה מכך"
 2. זמן עתיד במקום ציווי - "תלחץ פה" ולא "לחץ כאן"
 3. השמט "את" כשאפשר - "תפתח האפליקציה" ולא "תפתח את האפליקציה"
 4. אל תישמע כמו תרגום - תישמע כמו בן אדם שמדבר עם חבר
-5. כל משפט צריך להיות קצר וברור"""
+5. לפחות 200 מילים בסיכום המפורט
+6. התסריט חייב להיות מפורט עם טיימינג מדויק"""
 
         for attempt in range(retries):
             try:
@@ -131,18 +119,18 @@ class GeminiTranslator:
                     model=self.model,
                     contents=prompt,
                     config=types.GenerateContentConfig(
-                        temperature=0.8,
-                        max_output_tokens=3000
+                        temperature=0.85,
+                        max_output_tokens=4000
                     )
                 )
                 
-                result = self._parse_response_v2(response.text)
+                result = self._parse_response(response.text)
                 
                 # Validate we got real content
-                if result.get("summary") and len(result["summary"]) > 150:
+                if result.get("summary") and len(result["summary"]) > 200:
                     return result
                 else:
-                    print(f"    Retry {attempt+1}: Short response")
+                    print(f"    Retry {attempt+1}: Short response ({len(result.get('summary', ''))} chars)")
                     time.sleep(3)
                     continue
                     
@@ -169,13 +157,13 @@ class GeminiTranslator:
 🔷 **זמינות**
 בדקו את הקישור המקורי לפרטים על זמינות בישראל ומחירים.
 
-⚠️ העיבוד האוטומטי לא היה זמין - היכנסו לקישור למידע המלא.""",
-            "bottom_line": "בדקו את הקישור המקורי לפרטים נוספים.",
+⚠️ **הערה:** העיבוד האוטומטי לא היה זמין כרגע. היכנסו לקישור למידע המלא.""",
+            "bottom_line": "בשורה התחתונה: בדקו את הקישור המקורי לפרטים נוספים.",
             "video_script": ""
         }
     
-    def _parse_response_v2(self, text: str) -> dict:
-        """Parse response with === markers"""
+    def _parse_response(self, text: str) -> dict:
+        """Parse response with ### markers"""
         result = {
             "hebrew_title": "",
             "summary": "",
@@ -184,10 +172,10 @@ class GeminiTranslator:
         }
         
         sections = {
-            "כותרת": "hebrew_title",
-            "סיכום": "summary", 
+            "כותרת_עברית": "hebrew_title",
+            "סיכום_מפורט": "summary", 
             "שורה_תחתונה": "bottom_line",
-            "תסריט": "video_script"
+            "תסריט_וידאו": "video_script"
         }
         
         current_section = None
@@ -199,8 +187,8 @@ class GeminiTranslator:
             # Check for section markers
             found_section = False
             for marker, field in sections.items():
-                if f"==={marker}===" in line_stripped:
-                    if current_section:
+                if f"###{marker}###" in line_stripped or f"### {marker} ###" in line_stripped:
+                    if current_section and current_content:
                         result[current_section] = '\n'.join(current_content).strip()
                     current_section = field
                     current_content = []
@@ -208,12 +196,18 @@ class GeminiTranslator:
                     break
             
             if not found_section and current_section:
-                if not line_stripped.startswith("==="):
+                if not line_stripped.startswith("###"):
                     current_content.append(line)
         
         # Save last section
         if current_section and current_content:
             result[current_section] = '\n'.join(current_content).strip()
+        
+        # Cleanup - remove markdown ** from parsed content for cleaner display
+        for key in result:
+            if result[key]:
+                # Keep the structure but clean extra whitespace
+                result[key] = result[key].strip()
         
         # Fallback if markers didn't work
         if not result["summary"] or len(result["summary"]) < 100:
@@ -231,22 +225,37 @@ class GeminiTranslator:
         }
         
         lines = text.strip().split('\n')
-        full_text = []
+        
+        # Try to find sections by content
+        summary_lines = []
+        script_lines = []
+        in_script = False
         
         for line in lines:
             line = line.strip()
-            if line and not line.startswith("==="):
-                full_text.append(line)
+            if not line:
+                continue
+                
+            # Detect script section
+            if "הוק" in line and "0:00" in line:
+                in_script = True
+            if "ציון VPS" in line:
+                in_script = True
+            
+            if in_script:
+                script_lines.append(line)
+            elif line.startswith("🔷") or line.startswith("👍") or line.startswith("👎") or line.startswith("•"):
+                summary_lines.append(line)
+            elif "בשורה התחתונה" in line:
+                result["bottom_line"] = line
+            elif not result["hebrew_title"] and len(line) < 80 and not line.startswith("#"):
+                result["hebrew_title"] = line
+            else:
+                if not in_script:
+                    summary_lines.append(line)
         
-        if full_text and len(full_text[0]) < 100:
-            result["hebrew_title"] = full_text[0]
-            full_text = full_text[1:]
-        
-        if full_text:
-            # Split content - first 60% is summary, rest is script
-            split_point = int(len(full_text) * 0.6)
-            result["summary"] = '\n'.join(full_text[:split_point])
-            result["video_script"] = '\n'.join(full_text[split_point:])
+        result["summary"] = '\n'.join(summary_lines)
+        result["video_script"] = '\n'.join(script_lines)
         
         return result
     
