@@ -11,10 +11,17 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import config
 from src.collectors import collect_all_news, NewsItem
-from src.gmail_collector import collect_from_gmail
 from src.translator import GeminiTranslator
 from src.telegram_sender import TelegramSender
 from src.tracker import ArticleTracker
+
+# Try to import gmail collector (optional - requires beautifulsoup4)
+try:
+    from src.gmail_collector import collect_from_gmail
+    GMAIL_AVAILABLE = True
+except ImportError as e:
+    print(f"⚠️ Gmail collector not available: {e}")
+    GMAIL_AVAILABLE = False
 
 
 def main():
@@ -51,30 +58,33 @@ def main():
     print("\n📰 Collecting news from web sources...")
     all_news = collect_all_news(config)
     
-    # Step 2: Collect from Gmail newsletters
-    if config.GMAIL_ADDRESS and config.GMAIL_APP_PASSWORD:
+    # Step 2: Collect from Gmail newsletters (if available)
+    if GMAIL_AVAILABLE and config.GMAIL_ADDRESS and config.GMAIL_APP_PASSWORD:
         print("\n📬 Collecting from Gmail newsletters...")
-        newsletter_items = collect_from_gmail(
-            config.GMAIL_ADDRESS,
-            config.GMAIL_APP_PASSWORD,
-            days_back=config.NEWSLETTER_DAYS_BACK
-        )
-        
-        # Convert newsletter items to NewsItem format
-        for item in newsletter_items:
-            news_item = NewsItem(
-                title=item.title,
-                url=item.url,
-                source=item.source,
-                description=item.description,
-                score=item.score
+        try:
+            newsletter_items = collect_from_gmail(
+                config.GMAIL_ADDRESS,
+                config.GMAIL_APP_PASSWORD,
+                days_back=config.NEWSLETTER_DAYS_BACK
             )
-            news_item.is_tool = True
-            all_news.insert(0, news_item)  # Add at beginning (priority)
-        
-        print(f"📬 Added {len(newsletter_items)} newsletter items")
+            
+            # Convert newsletter items to NewsItem format
+            for item in newsletter_items:
+                news_item = NewsItem(
+                    title=item.title,
+                    url=item.url,
+                    source=item.source,
+                    description=item.description,
+                    score=item.score
+                )
+                news_item.is_tool = True
+                all_news.insert(0, news_item)  # Add at beginning (priority)
+            
+            print(f"📬 Added {len(newsletter_items)} newsletter items")
+        except Exception as e:
+            print(f"⚠️ Gmail collection failed: {e}")
     else:
-        print("\n📬 Gmail not configured, skipping newsletters")
+        print("\n📬 Gmail not configured or not available, skipping newsletters")
     
     print(f"\n📊 Total collected: {len(all_news)} items")
     
