@@ -165,6 +165,24 @@ schedule:
 
 ---
 
+## 🎬 חיתוך קטע מסרטון יוטיוב
+
+הסקריפט `extract_segment.py` מוריד **רק** קטע מוגדר מסרטון יוטיוב (ולא את כל הסרטון).
+
+```bash
+# התקנה
+pip install yt-dlp
+# צריך גם ffmpeg מותקן במערכת (למשל: apt install ffmpeg)
+
+# הורדת הקטע מ-9:44 עד 14:57
+python extract_segment.py https://youtu.be/z6ahRMyRumY --start 9:44 --end 14:57
+```
+
+הקובץ יישמר בשם `segment.mp4` בתיקייה הנוכחית.
+אפשר לקבוע שם אחר עם `-o`, ולתת זמנים בפורמט `SS`, `MM:SS` או `HH:MM:SS`.
+
+---
+
 ## 🐛 פתרון בעיות
 
 ### "API key was reported as leaked"
