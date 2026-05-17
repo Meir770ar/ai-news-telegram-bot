@@ -1,0 +1,55 @@
+name: Extract Video Segment
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'YouTube video URL'
+        required: true
+        default: 'https://youtu.be/z6ahRMyRumY'
+      start:
+        description: 'Start time (SS, MM:SS, or HH:MM:SS)'
+        required: true
+        default: '9:44'
+      end:
+        description: 'End time (SS, MM:SS, or HH:MM:SS)'
+        required: true
+        default: '14:57'
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install yt-dlp and ffmpeg
+        run: |
+          python -m pip install --upgrade pip
+          pip install yt-dlp
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Extract segment
+        env:
+          INPUT_URL: ${{ github.event.inputs.url }}
+          INPUT_START: ${{ github.event.inputs.start }}
+          INPUT_END: ${{ github.event.inputs.end }}
+        run: |
+          python extract_segment.py \
+            "$INPUT_URL" \
+            --start "$INPUT_START" \
+            --end "$INPUT_END" \
+            -o "segment.%(ext)s"
+
+      - name: Upload segment artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: video-segment
+          path: segment.*
+          if-no-files-found: error
+          retention-days: 30
