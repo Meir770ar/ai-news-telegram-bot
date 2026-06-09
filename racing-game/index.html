@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🏎️ מירוץ טורבו — משחק מירוץ מכוניות</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    background: #0b0f1a;
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    overflow: hidden;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  #wrap {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  canvas {
+    display: block;
+    border-radius: 12px;
+    box-shadow: 0 0 60px rgba(0, 200, 255, .25);
+    max-height: 100vh;
+  }
+  .overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #fff;
+    background: rgba(5, 8, 16, .82);
+    backdrop-filter: blur(4px);
+    z-index: 10;
+  }
+  .overlay.hidden { display: none; }
+  h1 {
+    font-size: clamp(34px, 8vw, 56px);
+    background: linear-gradient(90deg, #00e5ff, #ff3d71, #ffd740);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+  .sub { color: #9fb3d1; font-size: 16px; margin-bottom: 22px; line-height: 1.7; }
+  .btn {
+    font-size: 22px;
+    font-weight: 700;
+    color: #06121f;
+    background: linear-gradient(135deg, #00e5ff, #00b0ff);
+    border: none;
+    border-radius: 50px;
+    padding: 16px 52px;
+    cursor: pointer;
+    box-shadow: 0 6px 24px rgba(0, 200, 255, .45);
+    transition: transform .12s ease;
+    font-family: inherit;
+  }
+  .btn:hover { transform: scale(1.06); }
+  .btn:active { transform: scale(.96); }
+  .stats {
+    display: flex;
+    gap: 26px;
+    margin: 18px 0 26px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .stat {
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: 14px;
+    padding: 12px 22px;
+    min-width: 110px;
+  }
+  .stat .v { font-size: 28px; font-weight: 800; color: #ffd740; }
+  .stat .l { font-size: 13px; color: #9fb3d1; margin-top: 2px; }
+  .keys { color: #6c7f9c; font-size: 13px; margin-top: 24px; line-height: 1.9; }
+  kbd {
+    background: #1c2436;
+    border: 1px solid #34415c;
+    border-radius: 6px;
+    padding: 2px 9px;
+    font-family: inherit;
+    color: #cfe3ff;
+  }
+  #newRecord {
+    color: #ffd740;
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 10px;
+    animation: pulse 1s infinite;
+  }
+  @keyframes pulse { 50% { opacity: .4; transform: scale(1.05); } }
+  #levelToast {
+    position: absolute;
+    top: 18%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ffd740;
+    font-size: 34px;
+    font-weight: 900;
+    text-shadow: 0 0 24px rgba(255, 215, 64, .8);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 5;
+    white-space: nowrap;
+    transition: opacity .3s;
+  }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="game"></canvas>
+  <div id="levelToast"></div>
+
+  <div class="overlay" id="menu">
+    <h1>🏎️ מירוץ טורבו</h1>
+    <div class="sub">תחמקו מהתנועה, אספו מטבעות וטסו עם ניטרו!<br>כל שלב — מהר יותר, צפוף יותר, ממכר יותר.</div>
+    <div class="stats">
+      <div class="stat"><div class="v" id="menuBest">0</div><div class="l">שיא ניקוד</div></div>
+      <div class="stat"><div class="v" id="menuLevel">1</div><div class="l">שלב מקסימלי</div></div>
+    </div>
+    <button class="btn" id="startBtn">▶ התחל מירוץ</button>
+    <div class="keys">
+      <kbd>→</kbd> <kbd>←</kbd> או <kbd>A</kbd>/<kbd>D</kbd> — תנועה &nbsp;•&nbsp; <kbd>↑</kbd>/<kbd>W</kbd> — ניטרו<br>
+      במובייל: געו בצד המסך כדי לזוז, החליקו למעלה לניטרו
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="gameover">
+    <h1>💥 התרסקות!</h1>
+    <div id="newRecord" style="display:none">🏆 שיא חדש! 🏆</div>
+    <div class="stats">
+      <div class="stat"><div class="v" id="goScore">0</div><div class="l">ניקוד</div></div>
+      <div class="stat"><div class="v" id="goLevel">1</div><div class="l">שלב</div></div>
+      <div class="stat"><div class="v" id="goCoins">0</div><div class="l">מטבעות</div></div>
+      <div class="stat"><div class="v" id="goBest">0</div><div class="l">שיא</div></div>
+    </div>
+    <button class="btn" id="retryBtn">🔄 עוד פעם!</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ====== הגדרות ====== */
+const W = 420, H = 700;
+const LANES = 4;
+const ROAD_X = 50, ROAD_W = W - 100;
+const LANE_W = ROAD_W / LANES;
+const PLAYER_Y = H - 130;
+const CAR_W = 46, CAR_H = 80;
+const LEVEL_SCORE = 1200;          // ניקוד לכל שלב
+const STORAGE_KEY = 'turboRaceSave';
+
+// ערכות נושא לפי שלב (מתחלפות מחזורית)
+const THEMES = [
+  { name: 'יום',     sky: '#87b5d8', road: '#3a3f4b', side: '#4caf50', line: '#e8e8e8' },
+  { name: 'שקיעה',   sky: '#e8845c', road: '#383344', side: '#8d6e63', line: '#ffd9a0' },
+  { name: 'לילה',    sky: '#10142a', road: '#23262f', side: '#1b3a2a', line: '#aab6ff' },
+  { name: 'מדבר',    sky: '#f2c879', road: '#4a4438', side: '#c9a36a', line: '#fff3d0' },
+  { name: 'שלג',     sky: '#cfe4f0', road: '#5a6070', side: '#e8f2f8', line: '#ffffff' },
+];
+
+const ENEMY_COLORS = ['#e53935', '#8e24aa', '#fb8c00', '#43a047', '#3949ab', '#00897b', '#d81b60'];
+
+/* ====== Canvas ====== */
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+canvas.width = W; canvas.height = H;
+
+function fitCanvas() {
+  const s = Math.min(innerWidth / W, innerHeight / H);
+  canvas.style.width = (W * s) + 'px';
+  canvas.style.height = (H * s) + 'px';
+}
+addEventListener('resize', fitCanvas);
+fitCanvas();
+
+/* ====== צלילים (WebAudio, בלי קבצים) ====== */
+let audioCtx = null;
+function beep(freq, dur, type = 'square', vol = .08) {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + dur);
+  } catch (e) { /* אין אודיו — לא נורא */ }
+}
+const sfx = {
+  coin:   () => { beep(880, .08, 'sine', .1); beep(1320, .12, 'sine', .08); },
+  crash:  () => { beep(90, .5, 'sawtooth', .2); beep(60, .6, 'square', .15); },
+  level:  () => { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, .15, 'triangle', .12), i * 90)); },
+  nitro:  () => beep(220, .3, 'sawtooth', .07),
+  near:   () => beep(440, .06, 'sine', .05),
+  shield: () => { beep(660, .1, 'triangle', .1); beep(990, .15, 'triangle', .1); },
+};
+
+/* ====== שמירה ====== */
+function loadSave() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { best: 0, maxLevel: 1 }; }
+  catch (e) { return { best: 0, maxLevel: 1 }; }
+}
+function store(save) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(save)); } catch (e) {}
+}
+let save = loadSave();
+
+/* ====== מצב משחק ====== */
+const S = {
+  running: false,
+  score: 0, coins: 0, level: 1,
+  speed: 0, baseSpeed: 0,
+  playerLane: 1, playerX: 0, targetX: 0, tilt: 0,
+  nitro: 0, nitroActive: false, nitroTimer: 0,
+  shield: false,
+  enemies: [], pickups: [], particles: [],
+  roadOffset: 0, spawnTimer: 0, pickupTimer: 0,
+  shake: 0, combo: 0, comboTimer: 0,
+  theme: THEMES[0], nextTheme: THEMES[0], themeBlend: 1,
+};
+
+function laneCenter(lane) { return ROAD_X + lane * LANE_W + LANE_W / 2; }
+
+function reset() {
+  S.score = 0; S.coins = 0; S.level = 1;
+  S.baseSpeed = 4.2; S.speed = S.baseSpeed;
+  S.playerLane = 1;
+  S.playerX = S.targetX = laneCenter(1);
+  S.tilt = 0;
+  S.nitro = 100; S.nitroActive = false; S.nitroTimer = 0;
+  S.shield = false;
+  S.enemies = []; S.pickups = []; S.particles = [];
+  S.roadOffset = 0; S.spawnTimer = 0; S.pickupTimer = 0;
+  S.shake = 0; S.combo = 0; S.comboTimer = 0;
+  S.theme = THEMES[0]; S.nextTheme = THEMES[0]; S.themeBlend = 1;
+}
+
+/* ====== קלט ====== */
+function moveLane(dir) {
+  if (!S.running) return;
+  const next = S.playerLane + dir;
+  if (next >= 0 && next < LANES) {
+    S.playerLane = next;
+    S.targetX = laneCenter(next);
+  }
+}
+function tryNitro() {
+  if (S.running && S.nitro >= 30 && !S.nitroActive) {
+    S.nitroActive = true;
+    S.nitroTimer = 0;
+    sfx.nitro();
+  }
+}
+
+addEventListener('keydown', e => {
+  // במצב RTL החיצים נשארים פיזיים: שמאל = שמאלה על המסך
+  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') moveLane(-1);
+  else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') moveLane(1);
+  else if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === ' ') { e.preventDefault(); tryNitro(); }
+});
+
+// מגע: לחיצה על חצי מסך = תנועה, החלקה למעלה = ניטרו
+let touchStart = null;
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const t = e.changedTouches[0];
+  touchStart = { x: t.clientX, y: t.clientY, time: Date.now() };
+}, { passive: false });
+canvas.addEventListener('touchend', e => {
+  e.preventDefault();
+  if (!touchStart) return;
+  const t = e.changedTouches[0];
+  const dx = t.clientX - touchStart.x, dy = t.clientY - touchStart.y;
+  if (dy < -50 && Math.abs(dy) > Math.abs(dx)) tryNitro();
+  else if (Math.abs(dx) > 40) moveLane(dx > 0 ? 1 : -1);
+  else moveLane(t.clientX < innerWidth / 2 ? -1 : 1);
+  touchStart = null;
+}, { passive: false });
+
+/* ====== ספאון ====== */
+function spawnEnemy() {
+  // לא לחסום את כל הנתיבים — תמיד משאירים מעבר
+  const occupied = new Set(S.enemies.filter(en => en.y < 150).map(en => en.lane));
+  const free = [];
+  for (let i = 0; i < LANES; i++) if (!occupied.has(i)) free.push(i);
+  if (free.length <= 1) return;
+  const lane = free[Math.floor(Math.random() * free.length)];
+  const isTruck = S.level >= 3 && Math.random() < .2;
+  S.enemies.push({
+    lane,
+    x: laneCenter(lane),
+    y: -120,
+    w: isTruck ? 52 : CAR_W,
+    h: isTruck ? 120 : CAR_H,
+    color: ENEMY_COLORS[Math.floor(Math.random() * ENEMY_COLORS.length)],
+    speed: S.speed * (.45 + Math.random() * .25),
+    truck: isTruck,
+    // משלב 5 חלק מהמכוניות מחליפות נתיב
+    drift: S.level >= 5 && !isTruck && Math.random() < .25 ? (Math.random() < .5 ? -1 : 1) : 0,
+    driftDone: false,
+    nearMiss: false,
+  });
+}
+
+function spawnPickup() {
+  const lane = Math.floor(Math.random() * LANES);
+  const r = Math.random();
+  let type = 'coin';
+  if (r > .92) type = 'shield';
+  else if (r > .82) type = 'fuel';
+  S.pickups.push({ lane, x: laneCenter(lane), y: -40, type, spin: 0 });
+}
+
+function burst(x, y, color, n = 14) {
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, sp = 1 + Math.random() * 4;
+    S.particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 1, color, size: 2 + Math.random() * 4 });
+  }
+}
+
+/* ====== שלבים ====== */
+const toast = document.getElementById('levelToast');
+let toastTimeout = null;
+function showToast(text) {
+  toast.textContent = text;
+  toast.style.opacity = 1;
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => toast.style.opacity = 0, 1600);
+}
+
+function levelUp() {
+  S.level++;
+  S.baseSpeed += .85;
+  S.nitro = Math.min(100, S.nitro + 40);
+  sfx.level();
+  const theme = THEMES[(S.level - 1) % THEMES.length];
+  S.nextTheme = theme;
+  S.themeBlend = 0;
+  showToast(`🏁 שלב ${S.level} — ${theme.name}!`);
+  if (S.level > save.maxLevel) { save.maxLevel = S.level; store(save); }
+}
+
+/* ====== עדכון ====== */
+function update(dt) {
+  // ניטרו
+  if (S.nitroActive) {
+    S.nitroTimer += dt;
+    S.nitro = Math.max(0, S.nitro - dt * 45);
+    if (S.nitroTimer > 1.8 || S.nitro <= 0) S.nitroActive = false;
+  } else {
+    S.nitro = Math.min(100, S.nitro + dt * 6);
+  }
+  S.speed = S.baseSpeed * (S.nitroActive ? 1.9 : 1);
+
+  // ניקוד מתקדם עם מרחק; ניטרו מכפיל
+  S.score += S.speed * dt * 14 * (S.nitroActive ? 2 : 1) * (1 + S.combo * .1);
+
+  // שלב הבא
+  if (S.score >= S.level * LEVEL_SCORE) levelUp();
+
+  // מעבר ערכת נושא הדרגתי
+  if (S.themeBlend < 1) {
+    S.themeBlend = Math.min(1, S.themeBlend + dt * .7);
+    if (S.themeBlend >= 1) S.theme = S.nextTheme;
+  }
+
+  // קומבו דועך
+  if (S.comboTimer > 0) { S.comboTimer -= dt; if (S.comboTimer <= 0) S.combo = 0; }
+
+  // תנועת שחקן חלקה + הטיה
+  const dx = S.targetX - S.playerX;
+  S.playerX += dx * Math.min(1, dt * 12);
+  S.tilt = Math.max(-0.35, Math.min(0.35, dx * .012));
+
+  // כביש
+  S.roadOffset = (S.roadOffset + S.speed * dt * 60) % 80;
+
+  // ספאון אויבים — תדירות עולה עם שלבים
+  S.spawnTimer -= dt;
+  if (S.spawnTimer <= 0) {
+    spawnEnemy();
+    S.spawnTimer = Math.max(.32, 1.1 - S.level * .07) * (.7 + Math.random() * .6);
+  }
+  S.pickupTimer -= dt;
+  if (S.pickupTimer <= 0) { spawnPickup(); S.pickupTimer = 1.6 + Math.random() * 2; }
+
+  // אויבים
+  for (let i = S.enemies.length - 1; i >= 0; i--) {
+    const en = S.enemies[i];
+    en.y += (S.speed - en.speed) * dt * 60;
+
+    // החלפת נתיב של מכוניות "שיכורות"
+    if (en.drift && !en.driftDone && en.y > 180 && en.y < 380) {
+      const next = en.lane + en.drift;
+      if (next >= 0 && next < LANES) { en.lane = next; en.driftDone = true; }
+    }
+    en.x += (laneCenter(en.lane) - en.x) * Math.min(1, dt * 4);
+
+    // בונוס "כמעט פגיעה"
+    if (!en.nearMiss && Math.abs(en.y - PLAYER_Y) < CAR_H && Math.abs(en.x - S.playerX) > CAR_W * .8 && Math.abs(en.x - S.playerX) < LANE_W * 1.2) {
+      en.nearMiss = true;
+      S.combo++;
+      S.comboTimer = 3;
+      S.score += 25 * S.combo;
+      sfx.near();
+    }
+
+    // התנגשות
+    if (Math.abs(en.x - S.playerX) < (CAR_W + en.w) / 2 - 8 &&
+        Math.abs(en.y - PLAYER_Y) < (CAR_H + en.h) / 2 - 10) {
+      if (S.nitroActive || S.shield) {
+        // ניטרו/מגן מרסקים את המכונית השנייה
+        if (!S.nitroActive) S.shield = false;
+        burst(en.x, en.y, en.color, 22);
+        S.enemies.splice(i, 1);
+        S.score += 100;
+        S.shake = 8;
+        sfx.shield();
+        continue;
+      }
+      return gameOver();
+    }
+    if (en.y > H + 150) S.enemies.splice(i, 1);
+  }
+
+  // איסופים
+  for (let i = S.pickups.length - 1; i >= 0; i--) {
+    const p = S.pickups[i];
+    p.y += S.speed * dt * 60 * .8;
+    p.spin += dt * 6;
+    if (Math.abs(p.x - S.playerX) < 42 && Math.abs(p.y - PLAYER_Y) < 56) {
+      if (p.type === 'coin') { S.coins++; S.score += 50; sfx.coin(); burst(p.x, p.y, '#ffd740', 8); }
+      else if (p.type === 'fuel') { S.nitro = 100; sfx.nitro(); burst(p.x, p.y, '#00e5ff', 10); }
+      else { S.shield = true; sfx.shield(); burst(p.x, p.y, '#76ff03', 12); }
+      S.pickups.splice(i, 1);
+    } else if (p.y > H + 60) S.pickups.splice(i, 1);
+  }
+
+  // חלקיקים
+  for (let i = S.particles.length - 1; i >= 0; i--) {
+    const pt = S.particles[i];
+    pt.x += pt.vx; pt.y += pt.vy + S.speed * .5;
+    pt.life -= dt * 2;
+    if (pt.life <= 0) S.particles.splice(i, 1);
+  }
+
+  // עשן/אש מניטרו
+  if (S.nitroActive && Math.random() < .6) {
+    S.particles.push({
+      x: S.playerX + (Math.random() - .5) * 24, y: PLAYER_Y + CAR_H / 2,
+      vx: (Math.random() - .5), vy: 3 + Math.random() * 3,
+      life: .8, color: Math.random() < .5 ? '#ff9100' : '#00e5ff', size: 3 + Math.random() * 5,
+    });
+  }
+
+  if (S.shake > 0) S.shake = Math.max(0, S.shake - dt * 30);
+}
+
+/* ====== ציור ====== */
+function lerpColor(a, b, t) {
+  const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);
+  const r = Math.round(((pa >> 16) & 255) + (((pb >> 16) & 255) - ((pa >> 16) & 255)) * t);
+  const g = Math.round(((pa >> 8) & 255) + (((pb >> 8) & 255) - ((pa >> 8) & 255)) * t);
+  const bl = Math.round((pa & 255) + ((pb & 255) - (pa & 255)) * t);
+  return `rgb(${r},${g},${bl})`;
+}
+function themeColor(key) { return lerpColor(S.theme[key], S.nextTheme[key], S.themeBlend); }
+
+function drawCar(x, y, w, h, color, tilt = 0, isPlayer = false) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(tilt);
+  // צל
+  ctx.fillStyle = 'rgba(0,0,0,.3)';
+  ctx.beginPath(); ctx.ellipse(3, 6, w / 2 + 3, h / 2 + 2, 0, 0, Math.PI * 2); ctx.fill();
+  // גוף
+  const grad = ctx.createLinearGradient(-w / 2, 0, w / 2, 0);
+  grad.addColorStop(0, color);
+  grad.addColorStop(.5, '#fff');
+  grad.addColorStop(.55, color);
+  grad.addColorStop(1, color);
+  ctx.fillStyle = grad;
+  roundRect(-w / 2, -h / 2, w, h, 12); ctx.fill();
+  // שמשות
+  ctx.fillStyle = 'rgba(20,30,50,.85)';
+  roundRect(-w / 2 + 6, -h / 2 + 12, w - 12, h * .22, 5); ctx.fill();
+  roundRect(-w / 2 + 6, h / 2 - h * .3, w - 12, h * .18, 5); ctx.fill();
+  // גלגלים
+  ctx.fillStyle = '#111';
+  [[-w / 2 - 3, -h / 2 + 8], [w / 2 - 4, -h / 2 + 8], [-w / 2 - 3, h / 2 - 22], [w / 2 - 4, h / 2 - 22]]
+    .forEach(([wx, wy]) => { roundRect(wx, wy, 7, 16, 3); ctx.fill(); });
+  if (isPlayer) {
+    // פנסים
+    ctx.fillStyle = '#fff9c4';
+    ctx.fillRect(-w / 2 + 5, -h / 2 - 1, 9, 4);
+    ctx.fillRect(w / 2 - 14, -h / 2 - 1, 9, 4);
+    // מגן
+    if (S.shield) {
+      ctx.strokeStyle = 'rgba(118,255,3,.8)';
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.ellipse(0, 0, w / 2 + 12, h / 2 + 12, 0, 0, Math.PI * 2); ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function draw() {
+  ctx.save();
+  if (S.shake > 0) ctx.translate((Math.random() - .5) * S.shake, (Math.random() - .5) * S.shake);
+
+  // צדדים
+  ctx.fillStyle = themeColor('side');
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(0,0,0,.25)';
+  ctx.fillRect(0, 0, W, H);
+
+  // כביש
+  ctx.fillStyle = themeColor('road');
+  ctx.fillRect(ROAD_X, 0, ROAD_W, H);
+
+  // שוליים
+  ctx.fillStyle = '#f5f5f5';
+  ctx.fillRect(ROAD_X - 6, 0, 6, H);
+  ctx.fillRect(ROAD_X + ROAD_W, 0, 6, H);
+
+  // קווי נתיב נעים
+  ctx.strokeStyle = themeColor('line');
+  ctx.lineWidth = 4;
+  ctx.setLineDash([36, 44]);
+  ctx.lineDashOffset = -S.roadOffset;
+  for (let i = 1; i < LANES; i++) {
+    const x = ROAD_X + i * LANE_W;
+    ctx.beginPath(); ctx.moveTo(x, -80); ctx.lineTo(x, H + 80); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  // פסי מהירות בניטרו
+  if (S.nitroActive) {
+    ctx.strokeStyle = 'rgba(0,229,255,.35)';
+    ctx.lineWidth = 2;
+    for (let i = 0; i < 8; i++) {
+      const x = ROAD_X + Math.random() * ROAD_W;
+      const y = Math.random() * H;
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + 60); ctx.stroke();
+    }
+  }
+
+  // איסופים
+  for (const p of S.pickups) {
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    const wobble = Math.abs(Math.cos(p.spin));
+    if (p.type === 'coin') {
+      ctx.fillStyle = '#ffd740';
+      ctx.beginPath(); ctx.ellipse(0, 0, 14 * wobble + 2, 16, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#b8860b';
+      ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('₪', 0, 1);
+    } else if (p.type === 'fuel') {
+      ctx.fillStyle = '#00e5ff';
+      roundRect(-13, -16, 26, 32, 6); ctx.fill();
+      ctx.fillStyle = '#063';
+      ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('⚡', 0, 2);
+    } else {
+      ctx.fillStyle = '#76ff03';
+      ctx.beginPath(); ctx.arc(0, 0, 16, 0, Math.PI * 2); ctx.fill();
+      ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('🛡', 0, 1);
+    }
+    ctx.restore();
+  }
+
+  // אויבים
+  for (const en of S.enemies) drawCar(en.x, en.y, en.w, en.h, en.color);
+
+  // שחקן
+  drawCar(S.playerX, PLAYER_Y, CAR_W, CAR_H, S.nitroActive ? '#00e5ff' : '#ffd740', S.tilt, true);
+
+  // חלקיקים
+  for (const pt of S.particles) {
+    ctx.globalAlpha = Math.max(0, pt.life);
+    ctx.fillStyle = pt.color;
+    ctx.fillRect(pt.x - pt.size / 2, pt.y - pt.size / 2, pt.size, pt.size);
+  }
+  ctx.globalAlpha = 1;
+
+  drawHUD();
+  ctx.restore();
+}
+
+function drawHUD() {
+  // רקע עליון
+  const g = ctx.createLinearGradient(0, 0, 0, 70);
+  g.addColorStop(0, 'rgba(0,0,0,.55)');
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, 70);
+
+  ctx.textBaseline = 'top';
+  // ניקוד
+  ctx.textAlign = 'right';
+  ctx.fillStyle = '#fff';
+  ctx.font = '900 26px sans-serif';
+  ctx.fillText(Math.floor(S.score).toLocaleString(), W - 14, 10);
+  ctx.font = '600 13px sans-serif';
+  ctx.fillStyle = '#9fb3d1';
+  ctx.fillText('נקודות', W - 14, 40);
+
+  // שלב
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#ffd740';
+  ctx.font = '900 22px sans-serif';
+  ctx.fillText(`שלב ${S.level}`, 14, 10);
+  // התקדמות לשלב הבא
+  const progress = (S.score - (S.level - 1) * LEVEL_SCORE) / LEVEL_SCORE;
+  ctx.fillStyle = 'rgba(255,255,255,.2)';
+  roundRect(14, 38, 110, 8, 4); ctx.fill();
+  ctx.fillStyle = '#ffd740';
+  roundRect(14, 38, Math.max(6, 110 * Math.min(1, progress)), 8, 4); ctx.fill();
+
+  // מטבעות
+  ctx.fillStyle = '#ffd740';
+  ctx.font = '700 16px sans-serif';
+  ctx.fillText(`🪙 ${S.coins}`, 14, 54);
+
+  // קומבו
+  if (S.combo > 1) {
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ff3d71';
+    ctx.font = '900 20px sans-serif';
+    ctx.fillText(`קומבו x${S.combo} 🔥`, W / 2, 12);
+  }
+
+  // מד ניטרו תחתון
+  const nw = 180, nx = (W - nw) / 2, ny = H - 26;
+  ctx.fillStyle = 'rgba(0,0,0,.45)';
+  roundRect(nx - 4, ny - 4, nw + 8, 20, 10); ctx.fill();
+  ctx.fillStyle = S.nitro >= 30 ? '#00e5ff' : '#546e7a';
+  roundRect(nx, ny, Math.max(4, nw * S.nitro / 100), 12, 6); ctx.fill();
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fff';
+  ctx.font = '700 11px sans-serif';
+  ctx.fillText(S.nitroActive ? '🚀 ניטרו!!!' : (S.nitro >= 30 ? 'ניטרו מוכן — ↑' : 'ניטרו נטען...'), W / 2, ny - 18);
+}
+
+/* ====== לולאה ====== */
+let lastTime = 0;
+function loop(t) {
+  if (!S.running) return;
+  const dt = Math.min(.05, (t - lastTime) / 1000 || 0);
+  lastTime = t;
+  update(dt);
+  if (S.running) { draw(); requestAnimationFrame(loop); }
+}
+
+/* ====== מסכים ====== */
+const menuEl = document.getElementById('menu');
+const overEl = document.getElementById('gameover');
+
+function startGame() {
+  reset();
+  menuEl.classList.add('hidden');
+  overEl.classList.add('hidden');
+  S.running = true;
+  lastTime = performance.now();
+  requestAnimationFrame(loop);
+  showToast('🏁 שלב 1 — סעו!');
+}
+
+function gameOver() {
+  S.running = false;
+  sfx.crash();
+  burst(S.playerX, PLAYER_Y, '#ff5722', 40);
+  burst(S.playerX, PLAYER_Y, '#ffd740', 25);
+  // מציירים פריים אחרון עם הפיצוץ
+  S.shake = 14;
+  draw();
+
+  const finalScore = Math.floor(S.score);
+  const isRecord = finalScore > save.best;
+  if (isRecord) { save.best = finalScore; store(save); }
+
+  document.getElementById('goScore').textContent = finalScore.toLocaleString();
+  document.getElementById('goLevel').textContent = S.level;
+  document.getElementById('goCoins').textContent = S.coins;
+  document.getElementById('goBest').textContent = save.best.toLocaleString();
+  document.getElementById('newRecord').style.display = isRecord ? 'block' : 'none';
+  setTimeout(() => overEl.classList.remove('hidden'), 600);
+}
+
+document.getElementById('startBtn').addEventListener('click', startGame);
+document.getElementById('retryBtn').addEventListener('click', startGame);
+addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !S.running) startGame();
+});
+
+// מסך פתיחה
+document.getElementById('menuBest').textContent = save.best.toLocaleString();
+document.getElementById('menuLevel').textContent = save.maxLevel;
+reset();
+draw();
+</script>
+</body>
+</html>
